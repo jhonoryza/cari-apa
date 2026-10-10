@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cari Apa</title>
+<meta name="description" content="Cari Apa — mesin pencari web yang menghormati privasi.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Newsreader:ital,opsz,wght@0,6..72,500;0,6..72,600;1,6..72,500&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23C65D3B'/%3E%3Ccircle cx='14' cy='14' r='7' fill='none' stroke='%23FAF8F5' stroke-width='2.5'/%3E%3Cline x1='19.5' y1='19.5' x2='26' y2='26' stroke='%23FAF8F5' stroke-width='2.5' stroke-linecap='round'/%3E%3C/svg%3E">
+<style>
+:root{
+  --bg:#FAF8F5; --bg-soft:#F2EEE6; --card:#FFFFFF;
+  --border:#E7E1D4; --border-strong:#D8D0BE;
+  --fg:#211F1B; --fg-soft:#4C483F; --muted:#7C766A; --faint:#ABA398;
+  --coral:#C65D3B; --coral-deep:#9C4526; --coral-soft:#F7E4D7;
+  --ink:#2A2721; --ink-fg:#FAF8F5;
+  --visited:#6E56A8;
+  --ring:rgba(198,93,59,.28);
+  --shadow:0 1px 2px rgba(33,31,27,.05), 0 8px 28px -12px rgba(33,31,27,.18);
+  --shadow-lg:0 2px 6px rgba(33,31,27,.06), 0 24px 64px -16px rgba(33,31,27,.28);
+}
+[data-theme="dark"]{
+  --bg:#171614; --bg-soft:#201E1C; --card:#232120;
+  --border:#383431; --border-strong:#4A453E;
+  --fg:#EDE8DE; --fg-soft:#CFC8B9; --muted:#9C9487; --faint:#6B6459;
+  --coral:#D97B54; --coral-deep:#E89A74; --coral-soft:#3A2921;
+  --ink:#EDE8DE; --ink-fg:#171614;
+  --visited:#9B86D6;
+  --ring:rgba(217,123,84,.32);
+  --shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 28px -12px rgba(0,0,0,.5);
+  --shadow-lg:0 2px 6px rgba(0,0,0,.4), 0 24px 64px -16px rgba(0,0,0,.6);
+}
+*{box-sizing:border-box; margin:0; padding:0}
+html{-webkit-text-size-adjust:100%}
+body{
+  font-family:"Manrope",system-ui,-apple-system,"Segoe UI",sans-serif;
+  background:var(--bg); color:var(--fg);
+  min-height:100vh; transition:background .25s ease, color .25s ease;
+  -webkit-font-smoothing:antialiased;
+}
+::selection{background:var(--coral-soft)}
+a{color:inherit}
+button{font:inherit; cursor:pointer; border:none; background:none; color:inherit}
+input,select{font:inherit; color:inherit}
+.serif{font-family:"Newsreader",Georgia,serif}
+
+/* ---------- shared components (shadcn-ish) ---------- */
+.btn{
+  display:inline-flex; align-items:center; justify-content:center; gap:.5rem;
+  height:2.75rem; padding:0 1.4rem; border-radius:.8rem;
+  font-weight:600; font-size:.92rem; letter-spacing:.01em;
+  border:1px solid var(--border); background:var(--card); color:var(--fg);
+  transition:all .15s ease; white-space:nowrap;
+}
+.btn:hover{border-color:var(--border-strong); transform:translateY(-1px); box-shadow:var(--shadow)}
+.btn:active{transform:translateY(0)}
+.btn-primary{background:var(--ink); color:var(--ink-fg); border-color:var(--ink)}
+.btn-primary:hover{background:var(--coral); border-color:var(--coral); color:#fff}
+.btn-sm{height:2.25rem; padding:0 .9rem; font-size:.82rem; border-radius:.65rem}
+.icon-btn{
+  display:inline-flex; align-items:center; justify-content:center;
+  width:2.5rem; height:2.5rem; border-radius:.75rem; color:var(--muted);
+  border:1px solid transparent; transition:all .15s ease; flex:none;
+}
+.icon-btn:hover{background:var(--bg-soft); color:var(--fg); border-color:var(--border)}
+.icon-btn svg{width:1.15rem; height:1.15rem}
+.input{
+  width:100%; height:3.5rem; border-radius:1rem;
+  border:1.5px solid var(--border-strong); background:var(--card);
+  padding:0 1.1rem 0 3.2rem; font-size:1.02rem; outline:none;
+  transition:border-color .15s ease, box-shadow .15s ease;
+}
+.input::placeholder{color:var(--faint)}
+.input:focus{border-color:var(--coral); box-shadow:0 0 0 4px var(--ring)}
+.input-sm{height:2.6rem; border-radius:.8rem; font-size:.9rem; padding-left:2.7rem}
+.card{
+  background:var(--card); border:1px solid var(--border);
+  border-radius:1rem; box-shadow:var(--shadow);
+}
+.chip{
+  display:inline-flex; align-items:center; gap:.4rem;
+  padding:.45rem .95rem; border-radius:999px; font-size:.84rem; font-weight:500;
+  border:1px solid var(--border); background:var(--card); color:var(--fg-soft);
+  transition:all .15s ease;
+}
+.chip:hover{border-color:var(--coral); color:var(--coral-deep); transform:translateY(-1px)}
+.badge{
+  display:inline-flex; align-items:center; gap:.3rem;
+  font-size:.68rem; font-weight:600; letter-spacing:.06em; text-transform:uppercase;
+  padding:.22rem .6rem; border-radius:999px;
+  background:var(--bg-soft); color:var(--muted); border:1px solid var(--border);
+}
+.label{font-size:.75rem; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin-bottom:.45rem; display:block}
+.select{
+  height:2.5rem; border-radius:.7rem; border:1px solid var(--border);
+  background:var(--card); padding:0 .8rem; font-size:.87rem; outline:none; cursor:pointer;
+}
+.select:focus{border-color:var(--coral); box-shadow:0 0 0 3px var(--ring)}
+.sr{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0)}
+
+/* ---------- home view ---------- */
+#view-home{min-height:100vh; display:flex; flex-direction:column}
+.home-top{display:flex; justify-content:flex-end; align-items:center; gap:.35rem; padding:1.1rem 1.4rem}
+.home-main{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:0 1.25rem 8vh; width:100%}
+.brand{display:flex; align-items:baseline; gap:.65rem; margin-bottom:.6rem; user-select:none}
+.brand-mark{
+  width:3rem; height:3rem; border-radius:1rem; background:var(--coral);
+  display:inline-flex; align-items:center; justify-content:center; align-self:center;
+  box-shadow:var(--shadow);
+}
+.brand-mark svg{width:1.6rem; height:1.6rem; color:#fff}
+.brand h1{font-size:clamp(2.6rem,6vw,3.6rem); font-weight:600; letter-spacing:-.02em}
+.brand h1 em{font-style:italic; color:var(--coral-deep); font-weight:500}
+.tagline{color:var(--muted); font-size:1rem; margin-bottom:2.2rem; text-align:center; max-width:34rem; line-height:1.6}
+.search-wrap{width:100%; max-width:38rem; position:relative}
+.search-icon{position:absolute; left:1.15rem; top:50%; transform:translateY(-50%); color:var(--faint); pointer-events:none; display:flex}
+.search-icon svg{width:1.25rem; height:1.25rem}
+.search-actions{display:flex; gap:.8rem; justify-content:center; margin-top:1.6rem; flex-wrap:wrap}
+.recent{margin-top:2.6rem; width:100%; max-width:38rem}
+.recent h2{font-size:.75rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:var(--faint); margin-bottom:.8rem; text-align:center}
+.recent-chips{display:flex; flex-wrap:wrap; gap:.55rem; justify-content:center}
+.home-foot{padding:1.4rem; text-align:center; color:var(--faint); font-size:.8rem; display:flex; gap:1.2rem; justify-content:center; flex-wrap:wrap}
+.home-foot a{text-decoration:none; border-bottom:1px dotted var(--border-strong)}
+.home-foot a:hover{color:var(--coral-deep); border-color:var(--coral)}
+kbd.hint{font-family:inherit; font-size:.72rem; border:1px solid var(--border-strong); border-bottom-width:2px; border-radius:.4rem; padding:.1rem .45rem; background:var(--card); color:var(--muted)}
+
+/* ---------- results view ---------- */
+#view-results{display:none; min-height:100vh; flex-direction:column}
+.res-header{
+  position:sticky; top:0; z-index:40; background:color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--border);
+}
+.res-bar{display:flex; align-items:center; gap:.9rem; padding:.85rem 1.4rem; max-width:72rem; margin:0 auto; width:100%}
+.res-logo{display:flex; align-items:center; gap:.55rem; text-decoration:none; flex:none}
+.res-logo .brand-mark{width:2.1rem; height:2.1rem; border-radius:.6rem}
+.res-logo .brand-mark svg{width:1.1rem; height:1.1rem}
+.res-logo span{font-size:1.25rem; font-weight:600; letter-spacing:-.01em}
+.res-logo span em{font-style:italic; color:var(--coral-deep); font-weight:500}
+.res-search{position:relative; flex:1; max-width:44rem}
+.res-search .search-icon{left:.95rem}
+.res-search .search-icon svg{width:1.05rem; height:1.05rem}
+.res-tools{display:flex; gap:.3rem; margin-left:auto}
+.tabs-row{max-width:72rem; margin:0 auto; width:100%; padding:0 1.4rem; display:flex; align-items:center; gap:.25rem; overflow-x:auto; scrollbar-width:none}
+.tabs-row::-webkit-scrollbar{display:none}
+.tab{
+  display:inline-flex; align-items:center; gap:.45rem; padding:.7rem .95rem;
+  font-size:.88rem; font-weight:500; color:var(--muted); white-space:nowrap;
+  border-bottom:2.5px solid transparent; margin-bottom:-1px; transition:all .15s ease;
+}
+.tab svg{width:1rem; height:1rem}
+.tab:hover{color:var(--fg)}
+.tab.active{color:var(--coral-deep); border-bottom-color:var(--coral); font-weight:600}
+.timerange{margin-left:auto; padding-bottom:.35rem; flex:none}
+.res-body{flex:1; width:100%; max-width:72rem; margin:0 auto; padding:1.4rem 1.4rem 4rem}
+.meta-line{font-size:.83rem; color:var(--muted); margin-bottom:1.1rem; display:flex; align-items:center; gap:.6rem; flex-wrap:wrap}
+.correction{margin-bottom:1rem; font-size:.95rem}
+.correction button{color:var(--coral-deep); font-weight:600; font-style:italic}
+.correction button:hover{text-decoration:underline}
+.answer-card{
+  display:flex; gap:1rem; align-items:center; padding:1.1rem 1.3rem; margin-bottom:1.4rem;
+  background:linear-gradient(135deg, var(--coral-soft), var(--card)); max-width:44rem;
+}
+.answer-card .answer{font-size:1.5rem; font-weight:700; letter-spacing:-.01em}
+.answer-card .answer-q{font-size:.85rem; color:var(--muted)}
+
+/* result list */
+.result{padding:1.05rem 0; border-bottom:1px solid var(--border); max-width:44rem}
+.result:last-child{border-bottom:none}
+.result-crumb{display:flex; align-items:center; gap:.55rem; margin-bottom:.3rem; font-size:.8rem; color:var(--muted)}
+.favicon{width:1.25rem; height:1.25rem; border-radius:.35rem; background:var(--bg-soft); border:1px solid var(--border); display:inline-flex; align-items:center; justify-content:center; font-size:.65rem; font-weight:700; color:var(--muted); flex:none; overflow:hidden}
+.favicon img{width:100%; height:100%; object-fit:cover}
+.crumb-url{white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:26rem}
+.result-title{display:block; font-size:1.22rem; font-weight:500; line-height:1.35; text-decoration:none; margin-bottom:.3rem; letter-spacing:-.005em}
+.result-title:hover{text-decoration:underline; text-decoration-color:var(--coral); text-underline-offset:3px}
+.result-title:visited{color:var(--visited)}
+.result-snippet{font-size:.92rem; line-height:1.65; color:var(--fg-soft)}
+.result-meta{display:flex; align-items:center; gap:.5rem; margin-top:.45rem; font-size:.74rem; color:var(--faint)}
+.engine-dot{width:.35rem; height:.35rem; border-radius:50%; background:var(--faint); display:inline-block}
+
+/* images grid */
+.img-grid{columns:4 200px; column-gap:.9rem}
+.img-card{break-inside:avoid; margin-bottom:.9rem; border-radius:.9rem; overflow:hidden; border:1px solid var(--border); background:var(--card); position:relative; display:block; text-decoration:none; transition:transform .15s ease, box-shadow .15s ease}
+.img-card:hover{transform:translateY(-2px); box-shadow:var(--shadow-lg)}
+.img-card img{width:100%; display:block; background:var(--bg-soft)}
+.img-card .img-cap{padding:.6rem .8rem; font-size:.78rem; color:var(--fg-soft); line-height:1.45; display:flex; gap:.5rem; align-items:flex-start}
+.img-card .img-cap .favicon{width:1rem; height:1rem; font-size:.55rem; margin-top:.1rem}
+.img-card .play{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; pointer-events:none}
+.img-card .play span{width:3rem; height:3rem; border-radius:50%; background:rgba(20,18,16,.72); display:flex; align-items:center; justify-content:center; backdrop-filter:blur(4px)}
+.img-card .play svg{width:1.3rem; height:1.3rem; color:#fff; margin-left:2px}
+
+/* suggestions */
+.suggest-block{margin:2.2rem 0 0; max-width:44rem}
+.suggest-block h3{font-size:1.05rem; font-weight:600; margin-bottom:.9rem}
+.suggest-grid{display:grid; grid-template-columns:1fr 1fr; gap:.5rem}
+@media(max-width:560px){.suggest-grid{grid-template-columns:1fr}}
+.suggest-item{display:flex; align-items:center; gap:.7rem; padding:.7rem .9rem; border:1px solid var(--border); border-radius:.8rem; background:var(--card); font-size:.88rem; text-decoration:none; transition:all .15s ease}
+.suggest-item:hover{border-color:var(--coral); transform:translateY(-1px)}
+.suggest-item svg{width:.95rem; height:.95rem; color:var(--faint); flex:none}
+
+/* pagination */
+.pager{display:flex; align-items:center; justify-content:center; gap:.4rem; margin:2.6rem 0 1rem; flex-wrap:wrap}
+.page-btn{min-width:2.6rem; height:2.6rem; padding:0 .7rem; border-radius:.75rem; border:1px solid var(--border); background:var(--card); font-size:.9rem; font-weight:500; color:var(--fg-soft); display:inline-flex; align-items:center; justify-content:center; gap:.35rem; transition:all .15s ease}
+.page-btn:hover:not(:disabled){border-color:var(--coral); color:var(--coral-deep)}
+.page-btn.active{background:var(--ink); color:var(--ink-fg); border-color:var(--ink); font-weight:600}
+.page-btn:disabled{opacity:.4; cursor:default}
+.page-btn svg{width:1rem; height:1rem}
+
+/* skeletons */
+.skel{max-width:44rem}
+.skel-row{padding:1rem 0; border-bottom:1px solid var(--border)}
+.shimmer{position:relative; overflow:hidden; background:var(--bg-soft); border-radius:.5rem}
+.shimmer::after{content:""; position:absolute; inset:0; transform:translateX(-100%); background:linear-gradient(90deg,transparent,rgba(255,255,255,.45),transparent); animation:sh 1.3s infinite}
+[data-theme="dark"] .shimmer::after{background:linear-gradient(90deg,transparent,rgba(255,255,255,.08),transparent)}
+@keyframes sh{to{transform:translateX(100%)}}
+
+/* states */
+.state-card{max-width:34rem; margin:4rem auto; text-align:center; padding:2.5rem 2rem}
+.state-card .big-ico{width:3.6rem; height:3.6rem; border-radius:1.1rem; background:var(--coral-soft); color:var(--coral-deep); display:inline-flex; align-items:center; justify-content:center; margin-bottom:1.2rem}
+.state-card .big-ico svg{width:1.8rem; height:1.8rem}
+.state-card h2{font-size:1.3rem; font-weight:600; margin-bottom:.6rem}
+.state-card p{color:var(--muted); font-size:.92rem; line-height:1.7; margin-bottom:1.4rem}
+.state-card code{font-family:ui-monospace,Menlo,monospace; font-size:.8em; background:var(--bg-soft); border:1px solid var(--border); border-radius:.4rem; padding:.12rem .45rem}
+.setup-steps{text-align:left; background:var(--bg-soft); border:1px solid var(--border); border-radius:.9rem; padding:1.1rem 1.3rem; margin-bottom:1.4rem; font-size:.86rem; line-height:1.7; color:var(--fg-soft)}
+.setup-steps ol{padding-left:1.2rem; display:grid; gap:.55rem}
+
+/* modal */
+.modal-back{position:fixed; inset:0; background:rgba(24,22,19,.5); backdrop-filter:blur(6px); z-index:100; display:none; align-items:flex-start; justify-content:center; padding:8vh 1rem 1rem}
+.modal-back.open{display:flex}
+.modal{width:100%; max-width:30rem; animation:pop .18s ease}
+@keyframes pop{from{transform:translateY(10px) scale(.98); opacity:0}}
+.modal-head{display:flex; align-items:center; justify-content:space-between; padding:1.2rem 1.4rem .4rem}
+.modal-head h2{font-size:1.1rem; font-weight:600}
+.modal-body{padding:1rem 1.4rem 1.4rem; display:grid; gap:1.05rem}
+.field-row{display:grid; grid-template-columns:1fr 1fr; gap:.8rem}
+.modal-foot{display:flex; justify-content:flex-end; gap:.6rem; padding:0 1.4rem 1.4rem}
+
+/* toast */
+#toast{position:fixed; bottom:1.4rem; left:50%; transform:translate(-50%,20px); opacity:0; z-index:200; background:var(--ink); color:var(--ink-fg); padding:.8rem 1.3rem; border-radius:.9rem; font-size:.88rem; font-weight:500; box-shadow:var(--shadow-lg); transition:all .25s ease; pointer-events:none; max-width:90vw; text-align:center}
+#toast.show{transform:translate(-50%,0); opacity:1}
+
+.hidden{display:none !important}
+@media(max-width:640px){
+  .res-bar{flex-wrap:wrap; gap:.6rem}
+  .res-logo span{display:none}
+  .res-search{order:3; flex-basis:100%; max-width:none}
+  .timerange{margin-left:0}
+  .crumb-url{max-width:14rem}
+}
+</style>
+</head>
+<body>
+
+<!-- ================= HOME ================= -->
+<div id="view-home">
+  <div class="home-top">
+    <button class="icon-btn" id="theme-home" title="Ganti tema" aria-label="Ganti tema"></button>
+    <button class="icon-btn" id="settings-home" title="Pengaturan" aria-label="Pengaturan">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+    </button>
+  </div>
+  <main class="home-main">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/></svg>
+      </span>
+      <h1 class="serif">Cari <em>Apa</em></h1>
+    </div>
+    <p class="tagline">Cari seluruh web tanpa dilacak. Hasil gabungan dari banyak mesin pencari.</p>
+    <form class="search-wrap" id="home-form" autocomplete="off">
+      <span class="search-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/></svg>
+      </span>
+      <input class="input" id="home-q" type="search" placeholder="Cari apa hari ini?" aria-label="Kata kunci pencarian" enterkeyhint="search">
+      <div class="search-actions">
+        <button type="submit" class="btn btn-primary">Cari</button>
+        <button type="button" class="btn" id="lucky-btn" title="Buka hasil pertama langsung">Saya Lagi Beruntung</button>
+      </div>
+    </form>
+    <div class="recent hidden" id="recent-block">
+      <h2>Terakhir dicari</h2>
+      <div class="recent-chips" id="recent-chips"></div>
+    </div>
+  </main>
+  <footer class="home-foot">
+    <span>Privasi dulu — tanpa pelacakan, tanpa profil iklan.</span>
+    <span><a href="#" id="foot-about">Tentang</a></span>
+    <span>Tekan <kbd class="hint">/</kbd> untuk fokus ke pencarian</span>
+  </footer>
+</div>
+
+<!-- ================= RESULTS ================= -->
+<div id="view-results">
+  <header class="res-header">
+    <div class="res-bar">
+      <a class="res-logo" href="#/" aria-label="Cari Apa">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/></svg>
+        </span>
+        <span class="serif">Cari <em>Apa</em></span>
+      </a>
+      <form class="res-search" id="res-form" autocomplete="off">
+        <span class="search-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/></svg>
+        </span>
+        <input class="input input-sm" id="res-q" type="search" aria-label="Kata kunci pencarian" enterkeyhint="search">
+      </form>
+      <div class="res-tools">
+        <button class="icon-btn" id="theme-res" title="Ganti tema" aria-label="Ganti tema"></button>
+        <button class="icon-btn" id="settings-res" title="Pengaturan" aria-label="Pengaturan">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </button>
+      </div>
+    </div>
+    <nav class="tabs-row" id="tabs" aria-label="Kategori pencarian"></nav>
+  </header>
+  <main class="res-body" id="res-body" aria-live="polite"></main>
+</div>
+
+<!-- ================= SETTINGS MODAL ================= -->
+<div class="modal-back" id="modal-back">
+  <div class="card modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-head">
+      <h2 id="modal-title">Pengaturan</h2>
+      <button class="icon-btn" id="modal-close" aria-label="Tutup">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div>
+        <label class="label" for="set-base">URL Server Pencarian</label>
+        <input class="input input-sm" style="padding-left:1rem" id="set-base" type="url" placeholder="https://sxng.labkita.my.id">
+      </div>
+      <div class="field-row">
+        <div>
+          <label class="label" for="set-lang">Bahasa</label>
+          <select class="select" id="set-lang" style="width:100%">
+            <option value="id-ID">Indonesia</option>
+            <option value="en-US">English (US)</option>
+            <option value="en">English</option>
+            <option value="auto">Otomatis</option>
+          </select>
+        </div>
+        <div>
+          <label class="label" for="set-safe">SafeSearch</label>
+          <select class="select" id="set-safe" style="width:100%">
+            <option value="0">Mati</option>
+            <option value="1">Sedang</option>
+            <option value="2">Ketat</option>
+          </select>
+        </div>
+      </div>
+      <div>
+        <label class="label" for="set-theme">Tema</label>
+        <select class="select" id="set-theme" style="width:100%">
+          <option value="light">Terang</option>
+          <option value="dark">Gelap</option>
+          <option value="auto">Ikuti sistem</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-sm" id="set-reset">Atur ulang</button>
+      <button class="btn btn-sm btn-primary" id="set-save">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" role="status"></div>
+
+<script>
+"use strict";
+/* ============================================================
+   Cari Apa — frontend pencarian web privat
+   ============================================================ */
+const $ = (s, r) => (r || document).querySelector(s);
+const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
+const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+const ICONS = {
+  sun: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.9 4.9l1.4 1.4m11.4 11.4 1.4 1.4M2 12h2m16 0h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>',
+  moon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>',
+  search: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/></svg>',
+  image: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>',
+  news: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-4 0V9"/><path d="M18 14h-8M15 18h-5M10 6h8v4h-8V6z"/></svg>',
+  video: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="15" height="14" rx="2"/><path d="m17 10 5-3v10l-5-3"/></svg>',
+  globe: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>',
+  alert: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>',
+  inbox: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.5 5.1 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.5-6.9A2 2 0 0 0 16.7 4H7.3a2 2 0 0 0-1.8 1.1z"/></svg>',
+  chevL: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>',
+  chevR: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>',
+  play: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l11-6.5z"/></svg>',
+  dice: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="8.5" cy="8.5" r="1.2" fill="currentColor"/><circle cx="15.5" cy="15.5" r="1.2" fill="currentColor"/><circle cx="15.5" cy="8.5" r="1.2" fill="currentColor"/><circle cx="8.5" cy="15.5" r="1.2" fill="currentColor"/></svg>'
+};
+
+/* ---------------- settings ---------------- */
+const DEFAULTS = { base: "https://sxng.labkita.my.id", lang: "id-ID", safe: "1", theme: "light" };
+let settings = loadSettings();
+function loadSettings(){
+  try {
+    const s = JSON.parse(localStorage.getItem("cari-apa-settings") || "{}");
+    return Object.assign({}, DEFAULTS, s);
+  } catch { return Object.assign({}, DEFAULTS); }
+}
+function saveSettings(){ localStorage.setItem("cari-apa-settings", JSON.stringify(settings)); }
+
+let recent = [];
+try { recent = JSON.parse(localStorage.getItem("cari-apa-recent") || "[]"); } catch {}
+function pushRecent(q){
+  q = q.trim(); if(!q) return;
+  recent = [q].concat(recent.filter(x => x.toLowerCase() !== q.toLowerCase())).slice(0, 8);
+  localStorage.setItem("cari-apa-recent", JSON.stringify(recent));
+}
+
+/* ---------------- theme ---------------- */
+function effectiveTheme(){
+  if (settings.theme === "auto") return matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  return settings.theme;
+}
+function applyTheme(){
+  document.documentElement.dataset.theme = effectiveTheme();
+  const dark = effectiveTheme() === "dark";
+  $("#theme-home").innerHTML = dark ? ICONS.sun : ICONS.moon;
+  $("#theme-res").innerHTML = dark ? ICONS.sun : ICONS.moon;
+}
+function toggleTheme(){
+  const cur = effectiveTheme();
+  settings.theme = cur === "dark" ? "light" : "dark";
+  saveSettings(); applyTheme();
+}
+
+/* ---------------- toast ---------------- */
+let toastT;
+function toast(msg){
+  const t = $("#toast"); t.textContent = msg; t.classList.add("show");
+  clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove("show"), 3200);
+}
+
+/* ---------------- tabs ---------------- */
+const TABS = [
+  { id: "general", label: "Semua", icon: "globe" },
+  { id: "images",  label: "Gambar", icon: "image" },
+  { id: "news",    label: "Berita", icon: "news" },
+  { id: "videos",  label: "Video", icon: "video" }
+];
+function renderTabs(active){
+  $("#tabs").innerHTML = TABS.map(t =>
+    `<button class="tab${t.id === active ? " active" : ""}" data-cat="${t.id}" role="tab" aria-selected="${t.id === active}">${ICONS[t.icon]}${t.label}</button>`
+  ).join("") +
+  `<div class="timerange"><select class="select" id="time-range" aria-label="Rentang waktu" style="height:2.2rem;font-size:.8rem">
+     <option value="">Kapan saja</option><option value="day">24 jam terakhir</option>
+     <option value="week">Minggu ini</option><option value="month">Bulan ini</option><option value="year">Tahun ini</option>
+   </select></div>`;
+  $$("#tabs .tab").forEach(b => b.addEventListener("click", () => go({ cat: b.dataset.cat, page: 1 })));
+  const tr = $("#time-range");
+  tr.value = state.timeRange || "";
+  tr.addEventListener("change", () => go({ timeRange: tr.value, page: 1 }));
+}
+
+/* ---------------- router (hash) ---------------- */
+let state = { q: "", cat: "general", page: 1, timeRange: "" };
+function parseHash(){
+  const h = location.hash.replace(/^#\/?/, "");
+  if(!h) return null;
+  const p = new URLSearchParams(h);
+  return { q: p.get("q") || "", cat: p.get("cat") || "general", page: parseInt(p.get("page") || "1", 10) || 1, timeRange: p.get("time") || "" };
+}
+function buildHash(s){
+  const p = new URLSearchParams({ q: s.q, cat: s.cat, page: String(s.page) });
+  if(s.timeRange) p.set("time", s.timeRange);
+  return "#/?" + p.toString();
+}
+function go(patch){
+  Object.assign(state, patch);
+  if(!TABS.some(t => t.id === state.cat)) state.cat = "general";
+  const next = buildHash(state);
+  if(location.hash === next){ route(); }  // hash sama -> hashchange tak fire, paksa re-search
+  else location.hash = next;
+}
+window.addEventListener("hashchange", route);
+
+/* ---------------- searxng client ---------------- */
+async function searxSearch({ q, cat, page, timeRange }){
+  const base = settings.base.replace(/\/+$/, "");
+  const p = new URLSearchParams({
+    q, format: "json", pageno: String(page),
+    language: settings.lang, safesearch: settings.safe
+  });
+  if(cat && cat !== "general") p.set("categories", cat);
+  if(timeRange) p.set("time_range", timeRange);
+  const url = base + "/search?" + p.toString();
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), 25000);
+  try {
+    const res = await fetch(url, { signal: ctrl.signal, headers: { "Accept": "application/json" } });
+    clearTimeout(t);
+    if(res.status === 403){
+      const e = new Error("forbidden"); e.code = 403; throw e;
+    }
+    if(!res.ok){ const e = new Error("http " + res.status); e.code = res.status; throw e; }
+    return await res.json();
+  } catch(err){
+    clearTimeout(t);
+    if(err.name === "AbortError"){ const e = new Error("timeout"); e.code = "timeout"; throw e; }
+    if(err.code) throw err;
+    const e = new Error("network"); e.code = "network"; throw e;
+  }
+}
+
+/* ---------------- mock fixtures (untuk pengujian lokal) ---------------- */
+const MOCK = {
+results: {
+  "query": "cara membuat rendang", "number_of_results": 1240,
+  "results": [
+    {"url":"https://www.kompas.com/food/read/2024/05/12/resep-rendang-padang-asli","title":"Resep Rendang Padang Asli yang Empuk dan Bumbunya Meresap","content":"Rendang adalah masakan khas Minangkabau yang dimasak dalam waktu lama dengan santan dan rempah. Berikut resep rendang padang asli dengan daging empuk dan bumbu yang meresap sempurna...","engine":"google","engines":["google","bing"],"score":42.1,"category":"general","publishedDate":"2024-05-12"},
+    {"url":"https://id.wikipedia.org/wiki/Rendang","title":"Rendang - Wikipedia bahasa Indonesia","content":"Rendang atau randang dalam bahasa Minangkabau adalah masakan berbahan dasar daging yang berasal dari Minangkabau, dimasak dalam suhu rendah dalam waktu lama dengan menggunakan berbagai rempah-rempah dan santan.","engine":"wikipedia","engines":["wikipedia","duckduckgo"],"score":38.4,"category":"general"},
+    {"url":"https://www.youtube.com/watch?v=abc123rendang","title":"Cara Membuat Rendang Daging Sapi Empuk - Video Tutorial","content":"Tonton video tutorial lengkap membuat rendang daging sapi yang empuk dengan bumbu medok khas Padang. Durasi 15 menit.","engine":"youtube","engines":["youtube"],"score":30.2,"category":"general"},
+    {"url":"https://sajiansedap.grid.id/read/resep-rendang-jengkol","title":"Resep Rendang Jengkol Empuk Tidak Bau","content":"Varian rendang dengan jengkol yang empuk dan tidak bau. Kunci utamanya adalah merebus jengkol dengan daun salam dan kopi...","engine":"brave","engines":["brave"],"score":27.9,"category":"general"},
+    {"url":"https://www.detik.com/jateng/kuliner/d-1234567/sejarah-rendang","title":"Sejarah Rendang, dari Hidangan Adat hingga Mendunia","content":"Rendang dinobatkan sebagai makanan terenak di dunia versi CNN. Simak perjalanan sejarah rendang dari ranah Minang hingga ke meja makan dunia.","engine":"bing","engines":["bing","mojeek"],"score":25.1,"category":"general","publishedDate":"2025-11-02"}
+  ],
+  "answers": [], "corrections": [],
+  "suggestions": ["resep rendang padang asli","cara membuat rendang ayam","rendang daging sapi empuk","bumbu rendang instan terbaik"],
+  "infoboxes": [], "unresponsive_engines": []
+},
+images: {
+  "query": "rendang padang", "number_of_results": 860,
+  "results": [
+    {"url":"https://example.com/rendang-1","title":"Rendang daging sapi empuk dengan kuah kental","img_src":"https://picsum.photos/seed/rendang1/480/360","thumbnail_src":"https://picsum.photos/seed/rendang1/200/150","engine":"bing images","engines":["bing images"],"category":"images"},
+    {"url":"https://example.com/rendang-2","title":"Sepiring nasi rendang khas Padang","img_src":"https://picsum.photos/seed/rendang2/480/600","thumbnail_src":"https://picsum.photos/seed/rendang2/200/250","engine":"google images","engines":["google images"],"category":"images"},
+    {"url":"https://example.com/rendang-3","title":"Proses memasak rendang di kuali besar","img_src":"https://picsum.photos/seed/rendang3/480/320","thumbnail_src":"https://picsum.photos/seed/rendang3/200/133","engine":"duckduckgo","engines":["duckduckgo"],"category":"images"},
+    {"url":"https://example.com/rendang-4","title":"Bumbu rendang medok","img_src":"https://picsum.photos/seed/rendang4/480/480","thumbnail_src":"https://picsum.photos/seed/rendang4/200/200","engine":"brave","engines":["brave"],"category":"images"},
+    {"url":"https://example.com/rendang-5","title":"Rendang jengkol pedas manis","img_src":"https://picsum.photos/seed/rendang5/480/360","thumbnail_src":"https://picsum.photos/seed/rendang5/200/150","engine":"mojeek","engines":["mojeek"],"category":"images"},
+    {"url":"https://example.com/rendang-6","title":"Rendang ayam kampung","img_src":"https://picsum.photos/seed/rendang6/480/540","thumbnail_src":"https://picsum.photos/seed/rendang6/200/225","engine":"qwant","engines":["qwant"],"category":"images"}
+  ],
+  "answers": [], "corrections": [], "suggestions": ["gambar rendang padang asli","foto rendang daging"], "infoboxes": [], "unresponsive_engines": []
+},
+calc: {
+  "query": "15% dari 85000", "number_of_results": 3,
+  "results": [{"url":"https://example.com/kalkulator","title":"Kalkulator Online","content":"Hitung persen, diskon, dan konversi dengan kalkulator online gratis.","engine":"duckduckgo","engines":["duckduckgo"],"category":"general"}],
+  "answers": ["12750"], "corrections": [], "suggestions": [], "infoboxes": [], "unresponsive_engines": []
+},
+typo: {
+  "query": "jokowidodo", "number_of_results": 512,
+  "results": [{"url":"https://id.wikipedia.org/wiki/Joko_Widodo","title":"Joko Widodo - Wikipedia","content":"Joko Widodo adalah presiden ke-7 Indonesia yang menjabat sejak 2014 hingga 2024.","engine":"wikipedia","engines":["wikipedia"],"category":"general"}],
+  "answers": [], "corrections": ["joko widodo"],
+  "suggestions": ["joko widodo berita terbaru","biografi joko widodo"], "infoboxes": [], "unresponsive_engines": []
+},
+empty: {
+  "query": "zzqxjv kalimat yang tidak ada", "number_of_results": 0,
+  "results": [], "answers": [], "corrections": [], "suggestions": ["coba kata kunci lain"], "infoboxes": [], "unresponsive_engines": []
+}
+};
+const mockName = new URLSearchParams(location.search).get("mock");
+function maybeMock(){ return mockName && MOCK[mockName] ? MOCK[mockName] : null; }
+
+/* ---------------- render helpers ---------------- */
+function domainOf(url){
+  try { return new URL(url).hostname.replace(/^www\./, ""); } catch { return url; }
+}
+function faviconHTML(url, size){
+  const d = domainOf(url);
+  const letter = (d[0] || "?").toUpperCase();
+  return `<span class="favicon" aria-hidden="true"><img loading="lazy" src="https://www.google.com/s2/favicons?domain=${esc(d)}&sz=${size || 64}" alt="" onerror="this.remove()">${letter}</span>`;
+}
+function fmtNum(n){
+  if(n == null) return "";
+  return n >= 1000 ? n.toLocaleString("id-ID") : String(n);
+}
+function skeletons(){
+  let h = '<div class="skel" aria-hidden="true">';
+  for(let i = 0; i < 6; i++){
+    h += `<div class="skel-row">
+      <div class="shimmer" style="height:.85rem;width:38%;margin-bottom:.6rem"></div>
+      <div class="shimmer" style="height:1.3rem;width:72%;margin-bottom:.6rem"></div>
+      <div class="shimmer" style="height:.85rem;width:95%"></div>
+      <div class="shimmer" style="height:.85rem;width:80%;margin-top:.4rem"></div>
+    </div>`;
+  }
+  return h + "</div>";
+}
+
+/* ---------------- render: results list ---------------- */
+function renderResultList(data){
+  const rs = data.results || [];
+  if(!rs.length) return "";
+  return rs.map(r => {
+    const url = r.url || "#";
+    const title = r.title || domainOf(url);
+    const content = r.content || "";
+    const engines = (r.engines || []).slice(0, 3).join(" · ");
+    const date = r.publishedDate ? `<span>${esc(r.publishedDate)}</span><span class="engine-dot"></span>` : "";
+    return `<article class="result">
+      <div class="result-crumb">${faviconHTML(url)}<span class="crumb-url">${esc(domainOf(url))}</span></div>
+      <a class="result-title" href="${esc(url)}" target="_blank" rel="noopener noreferrer">${esc(title)}</a>
+      <p class="result-snippet">${esc(content)}</p>
+      <div class="result-meta">${date}${engines ? `<span>via ${esc(engines)}</span>` : ""}</div>
+    </article>`;
+  }).join("");
+}
+
+function renderImages(data){
+  const rs = data.results || [];
+  if(!rs.length) return "";
+  return `<div class="img-grid">` + rs.map(r => {
+    const src = r.thumbnail_src || r.img_src || "";
+    const full = r.img_src || r.url || "#";
+    const isVideo = state.cat === "videos";
+    return `<a class="img-card" href="${esc(r.url || full)}" target="_blank" rel="noopener noreferrer" title="${esc(r.title || "")}">
+      <img loading="lazy" src="${esc(src)}" alt="${esc(r.title || "")}" onerror="this.closest('.img-card').style.display='none'">
+      ${isVideo ? `<span class="play"><span>${ICONS.play}</span></span>` : ""}
+      <span class="img-cap">${faviconHTML(r.url || "")}<span>${esc((r.title || domainOf(r.url || "")).slice(0, 90))}</span></span>
+    </a>`;
+  }).join("") + `</div>`;
+}
+
+function renderSuggestions(sugs){
+  sugs = (sugs || []).filter(Boolean).slice(0, 8);
+  if(!sugs.length) return "";
+  return `<section class="suggest-block"><h3>Penelusuran terkait</h3><div class="suggest-grid">` +
+    sugs.map(s => `<a class="suggest-item" href="${esc(buildHash({ q: s, cat: state.cat, page: 1, timeRange: state.timeRange }))}">${ICONS.search}<span>${esc(s)}</span></a>`).join("") +
+    `</div></section>`;
+}
+
+function renderPager(total, page){
+  const perPage = 10;
+  const pages = Math.min(10, Math.max(1, Math.ceil(total / perPage)));
+  if(pages <= 1 && page <= 1) return "";
+  const cur = Math.min(page, pages);
+  let nums = [];
+  for(let p = Math.max(1, cur - 4); p <= Math.min(pages, cur + 4); p++) nums.push(p);
+  const link = p => esc(buildHash({ q: state.q, cat: state.cat, page: p, timeRange: state.timeRange }));
+  return `<nav class="pager" aria-label="Halaman hasil">
+    <a class="page-btn" ${cur <= 1 ? "disabled" : `href="${link(cur - 1)}"`} aria-label="Sebelumnya">${ICONS.chevL}</a>
+    ${nums.map(p => `<a class="page-btn${p === cur ? " active" : ""}" href="${link(p)}" aria-label="Halaman ${p}" ${p === cur ? 'aria-current="page"' : ""}>${p}</a>`).join("")}
+    <a class="page-btn" ${cur >= pages ? "disabled" : `href="${link(cur + 1)}"`} aria-label="Berikutnya">${ICONS.chevR}</a>
+  </nav>`;
+}
+
+function renderCorrection(corrections, q){
+  const c = (corrections || []).filter(Boolean)[0];
+  if(!c || c.toLowerCase() === q.toLowerCase()) return "";
+  return `<p class="correction">Maksud Anda: <button data-correct="${esc(c)}">${esc(c)}</button>?</p>`;
+}
+
+function renderAnswers(answers, q){
+  const a = (answers || []).filter(Boolean)[0];
+  if(!a) return "";
+  return `<div class="card answer-card"><div><div class="answer-q">${esc(q)} =</div><div class="answer">${esc(a)}</div></div></div>`;
+}
+
+/* ---------------- render: states ---------------- */
+function renderError(err){
+  const body = $("#res-body");
+  if(err.code === 403){
+    body.innerHTML = `<div class="card state-card">
+      <span class="big-ico">${ICONS.alert}</span>
+      <h2>Format JSON belum diaktifkan</h2>
+      <p>SearXNG di <code>${esc(settings.base)}</code> menolak format <code>json</code> (HTTP 403). Aktifkan dulu supaya aplikasi ini bisa membaca hasil pencarian.</p>
+      <div class="setup-steps"><ol>
+        <li>Di server SearXNG, buka <code>settings.yml</code> lalu tambahkan <code>json</code> ke <code>search.formats</code>, kemudian restart SearXNG.</li>
+        <li>Tambahkan header CORS <code>Access-Control-Allow-Origin: *</code> untuk path <code>/search</code> — bisa lewat reverse proxy (nginx/caddy) atau Cloudflare Transform Rule.</li>
+      </ol></div>
+      <button class="btn btn-primary" id="err-retry">Coba lagi</button>
+    </div>`;
+  } else if(err.code === "timeout"){
+    body.innerHTML = `<div class="card state-card">
+      <span class="big-ico">${ICONS.alert}</span>
+      <h2>Waktu habis</h2>
+      <p>Server SearXNG tidak merespons dalam 25 detik. Mungkin sedang sibuk atau tidak dapat dijangkau.</p>
+      <button class="btn btn-primary" id="err-retry">Coba lagi</button>
+    </div>`;
+  } else {
+    body.innerHTML = `<div class="card state-card">
+      <span class="big-ico">${ICONS.alert}</span>
+      <h2>Tidak dapat terhubung</h2>
+      <p>Periksa URL SearXNG di pengaturan dan pastikan server dapat diakses dari browser ini. ${err.code && err.code !== "network" ? `(HTTP ${esc(String(err.code))})` : ""}</p>
+      <div style="display:flex;gap:.6rem;justify-content:center;flex-wrap:wrap">
+        <button class="btn btn-primary" id="err-retry">Coba lagi</button>
+        <button class="btn" id="err-settings">Buka pengaturan</button>
+      </div>
+    </div>`;
+  }
+  const r = $("#err-retry"); if(r) r.addEventListener("click", () => runSearch());
+  const s = $("#err-settings"); if(s) s.addEventListener("click", openModal);
+}
+
+function renderEmpty(){
+  $("#res-body").innerHTML = `<div class="card state-card">
+    <span class="big-ico">${ICONS.inbox}</span>
+    <h2>Tidak ada hasil untuk “${esc(state.q)}”</h2>
+    <p>Coba periksa ejaan, gunakan kata kunci yang lebih umum, atau kurangi jumlah kata.</p>
+    <button class="btn" id="empty-home">Kembali ke beranda</button>
+  </div>`;
+  $("#empty-home").addEventListener("click", () => { location.hash = "#/"; });
+}
+
+/* ---------------- main search flow ---------------- */
+let searchSeq = 0;
+async function runSearch(){
+  const body = $("#res-body");
+  document.title = `${state.q} - Cari Apa`;
+  body.innerHTML = `<div class="meta-line"><span class="badge">Mencari</span></div>` + skeletons();
+  const seq = ++searchSeq;
+  const mock = maybeMock();
+  try {
+    const t0 = performance.now();
+    const data = mock || await searxSearch(state);
+    if(seq !== searchSeq) return;
+    const dt = ((performance.now() - t0) / 1000).toFixed(2);
+    pushRecent(state.q); renderRecent();
+    renderResultsView(data, dt);
+  } catch(err){
+    if(seq !== searchSeq) return;
+    renderError(err);
+  }
+}
+
+function renderResultsView(data, dt){
+  const body = $("#res-body");
+  const total = data.number_of_results || 0;
+  const isImg = state.cat === "images" || state.cat === "videos";
+  const listHTML = isImg ? renderImages(data) : renderResultList(data);
+  const unresp = (data.unresponsive_engines || []).length;
+
+  let h = `<div class="meta-line">`;
+  h += total ? `<span>Sekitar <strong>${fmtNum(total)}</strong> hasil</span><span class="engine-dot"></span><span>${dt} detik</span>`
+             : `<span>Hasil untuk “${esc(state.q)}”</span>`;
+  if(unresp) h += `<span class="badge" title="Beberapa engine tidak merespons">${unresp} engine lambat</span>`;
+  h += `</div>`;
+  h += renderCorrection(data.corrections, state.q);
+  h += renderAnswers(data.answers, state.q);
+  h += listHTML || "";
+  if(!listHTML){ renderEmpty(); return; }
+  h += renderSuggestions(data.suggestions);
+  h += renderPager(total, state.page);
+  body.innerHTML = h;
+
+  const cb = $("[data-correct]");
+  if(cb) cb.addEventListener("click", () => go({ q: cb.dataset.correct, page: 1 }));
+}
+
+/* ---------------- routing ---------------- */
+function route(){
+  const p = parseHash();
+  if(!p || !p.q){
+    $("#view-home").style.display = "flex";
+    $("#view-results").style.display = "none";
+    document.title = "Cari Apa";
+    $("#home-q").value = "";
+    return;
+  }
+  state = Object.assign(state, p);
+  $("#view-home").style.display = "none";
+  $("#view-results").style.display = "flex";
+  $("#res-q").value = state.q;
+  renderTabs(state.cat);
+  runSearch();
+  window.scrollTo({ top: 0 });
+}
+
+/* ---------------- recent ---------------- */
+function renderRecent(){
+  const block = $("#recent-block"), chips = $("#recent-chips");
+  if(!recent.length){ block.classList.add("hidden"); return; }
+  block.classList.remove("hidden");
+  chips.innerHTML = recent.map(q =>
+    `<button class="chip" data-q="${esc(q)}">${ICONS.search.replace('width="2.2"','width="2"')}<span>${esc(q.length > 34 ? q.slice(0, 34) + "…" : q)}</span></button>`
+  ).join("");
+  $$("#recent-chips .chip").forEach(b => b.addEventListener("click", () => go({ q: b.dataset.q, cat: "general", page: 1, timeRange: "" })));
+}
+
+/* ---------------- modal ---------------- */
+function openModal(){
+  $("#set-base").value = settings.base;
+  $("#set-lang").value = settings.lang;
+  $("#set-safe").value = settings.safe;
+  $("#set-theme").value = settings.theme;
+  $("#modal-back").classList.add("open");
+}
+function closeModal(){ $("#modal-back").classList.remove("open"); }
+
+/* ---------------- lucky ---------------- */
+async function feelingLucky(q){
+  q = (q || "").trim();
+  if(!q){ $("#home-q").focus(); return; }
+  toast("Mencari hasil pertama…");
+  const mock = maybeMock();
+  try {
+    const data = mock || await searxSearch({ q, cat: "general", page: 1, timeRange: "" });
+    const first = (data.results || [])[0];
+    if(first && first.url){ pushRecent(q); window.open(first.url, "_blank", "noopener"); }
+    else toast("Tidak ada hasil ditemukan.");
+  } catch { toast("Gagal terhubung ke SearXNG."); }
+}
+
+/* ---------------- wire up ---------------- */
+function init(){
+  applyTheme();
+  renderRecent();
+
+  $("#theme-home").addEventListener("click", toggleTheme);
+  $("#theme-res").addEventListener("click", toggleTheme);
+  $("#settings-home").addEventListener("click", openModal);
+  $("#settings-res").addEventListener("click", openModal);
+  $("#modal-close").addEventListener("click", closeModal);
+  $("#modal-back").addEventListener("click", e => { if(e.target.id === "modal-back") closeModal(); });
+  document.addEventListener("keydown", e => {
+    if(e.key === "Escape") closeModal();
+    if(e.key === "/" && !/input|select|textarea/i.test(document.activeElement.tagName)){
+      e.preventDefault();
+      const v = $("#view-results").style.display === "flex" ? $("#res-q") : $("#home-q");
+      v.focus(); v.select();
+    }
+  });
+
+  $("#set-save").addEventListener("click", () => {
+    const base = $("#set-base").value.trim().replace(/\/+$/, "") || DEFAULTS.base;
+    settings.base = base; settings.lang = $("#set-lang").value;
+    settings.safe = $("#set-safe").value; settings.theme = $("#set-theme").value;
+    saveSettings(); applyTheme(); closeModal(); toast("Pengaturan disimpan.");
+    if(state.q) runSearch();
+  });
+  $("#set-reset").addEventListener("click", () => {
+    settings = Object.assign({}, DEFAULTS); saveSettings(); applyTheme(); openModal(); toast("Pengaturan dikembalikan.");
+  });
+
+  $("#home-form").addEventListener("submit", e => {
+    e.preventDefault();
+    const q = $("#home-q").value.trim();
+    if(!q){ $("#home-q").focus(); return; }
+    go({ q, cat: "general", page: 1, timeRange: "" });
+  });
+  $("#lucky-btn").addEventListener("click", () => feelingLucky($("#home-q").value));
+  $("#res-form").addEventListener("submit", e => {
+    e.preventDefault();
+    const q = $("#res-q").value.trim();
+    if(!q){ $("#res-q").focus(); return; }
+    go({ q, page: 1 });
+  });
+  $("#foot-about").addEventListener("click", e => {
+    e.preventDefault();
+    toast("Cari Apa — cari web tanpa dilacak.");
+  });
+
+  if(matchMedia) matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => { if(settings.theme === "auto") applyTheme(); });
+
+  route();
+}
+document.addEventListener("DOMContentLoaded", init);
+</script>
+</body>
+</html>
