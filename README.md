@@ -11,8 +11,7 @@ mandiri — tanpa build step, tanpa backend. Deploy sebagai situs statis
 - Halaman hasil: tab **Semua / Gambar / Berita / Video**, filter rentang waktu,
   breadcrumb favicon + domain, snippet, badge engine, "Maksud Anda",
   kartu jawaban kalkulator, "Penelusuran terkait", pagination
-- Pengaturan: URL server pencarian, bahasa, SafeSearch, tema
-  (terang/gelap/ikuti sistem)
+- Pengaturan: bahasa, SafeSearch, tema (terang/gelap/ikuti sistem)
 - Riwayat pencarian tersimpan lokal (localStorage), shortcut `/` untuk fokus,
   skeleton loading, state error yang jelas
 

@@ -358,10 +358,6 @@ kbd.hint{font-family:var(--mono); font-size:.72rem; border:1px solid var(--borde
       </button>
     </div>
     <div class="modal-body">
-      <div>
-        <label class="label" for="set-base">URL Server Pencarian</label>
-        <input class="input input-sm" style="padding-left:1rem" id="set-base" type="password" autocomplete="off" placeholder="https://sxng.labkita.my.id">
-      </div>
       <div class="field-row">
         <div>
           <label class="label" for="set-lang">Bahasa</label>
@@ -811,7 +807,6 @@ function renderRecent(){
 
 /* ---------------- modal ---------------- */
 function openModal(){
-  $("#set-base").value = settings.base;
   $("#set-lang").value = settings.lang;
   $("#set-safe").value = settings.safe;
   $("#set-theme").value = settings.theme;
@@ -854,8 +849,7 @@ function init(){
   });
 
   $("#set-save").addEventListener("click", () => {
-    const base = $("#set-base").value.trim().replace(/\/+$/, "") || DEFAULTS.base;
-    settings.base = base; settings.lang = $("#set-lang").value;
+    settings.lang = $("#set-lang").value;
     settings.safe = $("#set-safe").value; settings.theme = $("#set-theme").value;
     saveSettings(); applyTheme(); closeModal(); toast("Pengaturan disimpan.");
     if(state.q) runSearch();
