@@ -5,11 +5,34 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Cari Apa</title>
 <meta name="description" content="Cari Apa — mesin pencari web yang menghormati privasi.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=Ubuntu+Mono:wght@400;500;700&family=Newsreader:ital,opsz,wght@0,6..72,500;0,6..72,600;1,6..72,500&display=swap" rel="stylesheet">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23C65D3B'/%3E%3Ccircle cx='14' cy='14' r='7' fill='none' stroke='%23FAF8F5' stroke-width='2.5'/%3E%3Cline x1='19.5' y1='19.5' x2='26' y2='26' stroke='%23FAF8F5' stroke-width='2.5' stroke-linecap='round'/%3E%3C/svg%3E">
 <style>
+/* Anthropic brand fonts (via jsDelivr, pinned commit) — https://github.com/matthieuhuguet/anthropic-fonts */
+@font-face{
+  font-family:"AnthropicSans";
+  src:url("https://cdn.jsdelivr.net/gh/matthieuhuguet/anthropic-fonts@4fdbcccccc3643e79ed16a54c4a25a8ef2d3db50/woff2-original/AnthropicSans-Romans.woff2") format("woff2");
+  font-weight:300 800; font-style:normal; font-display:swap;
+}
+@font-face{
+  font-family:"AnthropicSans";
+  src:url("https://cdn.jsdelivr.net/gh/matthieuhuguet/anthropic-fonts@4fdbcccccc3643e79ed16a54c4a25a8ef2d3db50/woff2-original/AnthropicSans-Italics.woff2") format("woff2");
+  font-weight:300 800; font-style:italic; font-display:swap;
+}
+@font-face{
+  font-family:"AnthropicSerif";
+  src:url("https://cdn.jsdelivr.net/gh/matthieuhuguet/anthropic-fonts@4fdbcccccc3643e79ed16a54c4a25a8ef2d3db50/woff2-original/AnthropicSerif-Romans.woff2") format("woff2");
+  font-weight:300 800; font-style:normal; font-display:swap;
+}
+@font-face{
+  font-family:"AnthropicSerif";
+  src:url("https://cdn.jsdelivr.net/gh/matthieuhuguet/anthropic-fonts@4fdbcccccc3643e79ed16a54c4a25a8ef2d3db50/woff2-original/AnthropicSerif-Italics.woff2") format("woff2");
+  font-weight:300 800; font-style:italic; font-display:swap;
+}
+@font-face{
+  font-family:"AnthropicMono";
+  src:url("https://cdn.jsdelivr.net/gh/matthieuhuguet/anthropic-fonts@4fdbcccccc3643e79ed16a54c4a25a8ef2d3db50/woff2-original/AnthropicMono.woff2") format("woff2");
+  font-weight:300 800; font-style:normal; font-display:swap;
+}
 :root{
   --bg:#FAF8F5; --bg-soft:#F2EEE6; --card:#FFFFFF;
   --border:#E7E1D4; --border-strong:#D8D0BE;
@@ -18,7 +41,7 @@
   --ink:#2A2721; --ink-fg:#FAF8F5;
   --visited:#6E56A8;
   --ring:rgba(198,93,59,.28);
-  --mono:"Ubuntu Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --mono:"AnthropicMono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
   --shadow:0 1px 2px rgba(33,31,27,.05), 0 8px 28px -12px rgba(33,31,27,.18);
   --shadow-lg:0 2px 6px rgba(33,31,27,.06), 0 24px 64px -16px rgba(33,31,27,.28);
 }
@@ -36,7 +59,7 @@
 *{box-sizing:border-box; margin:0; padding:0}
 html{-webkit-text-size-adjust:100%}
 body{
-  font-family:"Open Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  font-family:"AnthropicSans",system-ui,-apple-system,"Segoe UI",sans-serif;
   background:var(--bg); color:var(--fg);
   min-height:100vh; transition:background .25s ease, color .25s ease;
   -webkit-font-smoothing:antialiased;
@@ -45,7 +68,7 @@ body{
 a{color:inherit}
 button{font:inherit; cursor:pointer; border:none; background:none; color:inherit}
 input,select{font:inherit; color:inherit}
-.serif{font-family:"Newsreader",Georgia,serif}
+.serif{font-family:"AnthropicSerif",Georgia,serif}
 
 /* ---------- shared components (shadcn-ish) ---------- */
 .btn{
