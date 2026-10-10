@@ -206,6 +206,7 @@ kbd.hint{font-family:inherit; font-size:.72rem; border:1px solid var(--border-st
 .page-btn:hover:not(:disabled){border-color:var(--coral); color:var(--coral-deep)}
 .page-btn.active{background:var(--ink); color:var(--ink-fg); border-color:var(--ink); font-weight:600}
 .page-btn:disabled{opacity:.4; cursor:default}
+.page-btn[disabled]{opacity:.4; cursor:default; pointer-events:none}
 .page-btn svg{width:1rem; height:1rem}
 
 /* skeletons */
@@ -623,19 +624,28 @@ function renderSuggestions(sugs){
     `</div></section>`;
 }
 
-function renderPager(total, page){
+function renderPager(total, page, count){
   const perPage = 10;
-  const pages = Math.min(10, Math.max(1, Math.ceil(total / perPage)));
-  if(pages <= 1 && page <= 1) return "";
-  const cur = Math.min(page, pages);
-  let nums = [];
-  for(let p = Math.max(1, cur - 4); p <= Math.min(pages, cur + 4); p++) nums.push(p);
+  const pages = total > 0 ? Math.min(10, Math.max(1, Math.ceil(total / perPage))) : 0;
   const link = p => esc(buildHash({ q: state.q, cat: state.cat, page: p, timeRange: state.timeRange }));
-  return `<nav class="pager" aria-label="Halaman hasil">
-    <a class="page-btn" ${cur <= 1 ? "disabled" : `href="${link(cur - 1)}"`} aria-label="Sebelumnya">${ICONS.chevL}</a>
-    ${nums.map(p => `<a class="page-btn${p === cur ? " active" : ""}" href="${link(p)}" aria-label="Halaman ${p}" ${p === cur ? 'aria-current="page"' : ""}>${p}</a>`).join("")}
-    <a class="page-btn" ${cur >= pages ? "disabled" : `href="${link(cur + 1)}"`} aria-label="Berikutnya">${ICONS.chevR}</a>
-  </nav>`;
+  const prevBtn = cur => `<a class="page-btn"${cur <= 1 ? " disabled" : ` href="${link(cur - 1)}"`} aria-label="Sebelumnya">${ICONS.chevL}</a>`;
+  const nextBtn = (cur, enabled) => `<a class="page-btn"${enabled ? ` href="${link(cur + 1)}"` : " disabled"} aria-label="Berikutnya">${ICONS.chevR}</a>`;
+  if(pages > 0){
+    if(pages <= 1 && page <= 1) return "";
+    const cur = Math.min(page, pages);
+    let nums = [];
+    for(let p = Math.max(1, cur - 4); p <= Math.min(pages, cur + 4); p++) nums.push(p);
+    return `<nav class="pager" aria-label="Halaman hasil">${prevBtn(cur)}
+      ${nums.map(p => `<a class="page-btn${p === cur ? " active" : ""}" href="${link(p)}" aria-label="Halaman ${p}"${p === cur ? ' aria-current="page"' : ""}>${p}</a>`).join("")}
+      ${nextBtn(cur, cur < pages)}</nav>`;
+  }
+  // SearXNG tidak selalu memberi number_of_results — tampilkan prev/next sederhana
+  if(count > 0 && page >= 1){
+    const nextOn = count >= perPage;
+    if(page <= 1) return `<nav class="pager" aria-label="Halaman hasil"><span class="page-btn active" aria-current="page">1</span>${nextBtn(1, nextOn)}</nav>`;
+    return `<nav class="pager" aria-label="Halaman hasil">${prevBtn(page)}<span class="page-btn active" aria-current="page">${page}</span>${nextBtn(page, nextOn)}</nav>`;
+  }
+  return "";
 }
 
 function renderCorrection(corrections, q){
@@ -734,7 +744,7 @@ function renderResultsView(data, dt){
   h += listHTML || "";
   if(!listHTML){ renderEmpty(); return; }
   h += renderSuggestions(data.suggestions);
-  h += renderPager(total, state.page);
+  h += renderPager(total, state.page, (data.results || []).length);
   body.innerHTML = h;
 
   const cb = $("[data-correct]");
