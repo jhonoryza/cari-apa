@@ -107,8 +107,10 @@ input,select{font:inherit; color:inherit}
   display:inline-flex; align-items:center; gap:.4rem;
   padding:.45rem .95rem; border-radius:999px; font-size:.84rem; font-weight:500;
   border:1px solid var(--border); background:var(--card); color:var(--fg-soft);
-  transition:all .15s ease;
+  transition:all .15s ease; white-space:nowrap; max-width:100%;
 }
+.chip svg{width:.85rem; height:.85rem; flex:none}
+.chip span{overflow:hidden; text-overflow:ellipsis}
 .chip:hover{border-color:var(--coral); color:var(--coral-deep); transform:translateY(-1px)}
 .badge{
   display:inline-flex; align-items:center; gap:.3rem;
@@ -141,6 +143,8 @@ input,select{font:inherit; color:inherit}
 .search-wrap{width:100%; max-width:38rem; position:relative}
 .search-icon{position:absolute; left:1.15rem; top:50%; transform:translateY(-50%); color:var(--faint); pointer-events:none; display:flex}
 .search-icon svg{width:1.25rem; height:1.25rem}
+/* form home berisi input + tombol, jadi ikon harus center terhadap input (3.5rem), bukan form */
+#home-form .search-icon{top:1.75rem}
 .search-actions{display:flex; gap:.8rem; justify-content:center; margin-top:1.6rem; flex-wrap:wrap}
 .recent{margin-top:2.6rem; width:100%; max-width:38rem}
 .recent h2{font-size:.75rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:var(--faint); margin-bottom:.8rem; text-align:center}
@@ -800,7 +804,7 @@ function renderRecent(){
   if(!recent.length){ block.classList.add("hidden"); return; }
   block.classList.remove("hidden");
   chips.innerHTML = recent.map(q =>
-    `<button class="chip" data-q="${esc(q)}">${ICONS.search.replace('width="2.2"','width="2"')}<span>${esc(q.length > 34 ? q.slice(0, 34) + "…" : q)}</span></button>`
+    `<button class="chip" data-q="${esc(q)}">${ICONS.search}<span>${esc(q.length > 34 ? q.slice(0, 34) + "…" : q)}</span></button>`
   ).join("");
   $$("#recent-chips .chip").forEach(b => b.addEventListener("click", () => go({ q: b.dataset.q, cat: "general", page: 1, timeRange: "" })));
 }
